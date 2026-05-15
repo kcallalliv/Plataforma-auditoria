@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><span class="material-symbols-outlined">domain</span></div>
+      <div><h1>Auditoría Web</h1><p>Claro Perú</p></div>
+      <button id="toggleSidebar" class="icon-button sidebar-toggle" title="Comprimir sidebar" aria-label="Comprimir sidebar">
+        <span class="material-symbols-outlined">left_panel_close</span>
+      </button>
+    </div>
+    <nav class="nav-menu">
+      <button class="nav active" data-page="overview"><span class="material-symbols-outlined">dashboard</span>Resumen</button>
+      <button class="nav" data-page="sitemap"><span class="material-symbols-outlined">account_tree</span>Módulo 1 · Sitemap</button>
+      <button class="nav" data-page="technical"><span class="material-symbols-outlined">settings_suggest</span>Módulo 2 · Técnico</button>
+      <button class="nav" data-page="seo"><span class="material-symbols-outlined">search</span>Módulo 3 · SEO</button>
+      <button class="nav" data-page="tagging"><span class="material-symbols-outlined">label</span>Módulo 4 · Tagging</button>
+    </nav>
+    <button class="nav config"><span class="material-symbols-outlined">settings</span>Configuración</button>
+  </aside>
+  <section class="workspace">
+    <header class="topbar">
+      <div class="topbar-brand">Claro</div>
+      <div class="topbar-actions">
+        <button id="toggleSidebar" class="button secondary">☰ Sidebar</button>
+        <div class="search-shell"><span class="material-symbols-outlined">search</span><input id="search" placeholder="Buscar URL..." /></div>
+        <span class="run-chip">Última corrida</span>
+        <button id="refresh" class="button secondary"><span class="material-symbols-outlined">refresh</span>Actualizar</button>
+        <button class="button primary">Execute Audit<span class="material-symbols-outlined">play_arrow</span></button>
+        <button class="icon-button"><span class="material-symbols-outlined">notifications</span></button>
+        <button class="icon-button"><span class="material-symbols-outlined">help_outline</span></button>
+      </div>
+    </header>
+    <main id="app" class="content"></main>
+  </section>
+  <div id="toast" class="toast hidden"></div>
+  <script src="./assets/config.js"></script>
+  <script src="./assets/api.js"></script>
+  <script src="./assets/app.js"></script>
+</body>
+</html>
