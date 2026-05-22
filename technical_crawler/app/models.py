@@ -8,6 +8,9 @@ class RunTechnicalCrawlerRequest(BaseModel):
     max_urls: Optional[int] = None
     timeout_seconds: Optional[int] = 20
     device_priority: str = "mobile"
+    device_profile: Optional[str] = None
+    device_profiles: Optional[list[str]] = None
+    runtime_scan: bool = False
 
 class RunTechnicalCrawlerResponse(BaseModel):
     run_id: str

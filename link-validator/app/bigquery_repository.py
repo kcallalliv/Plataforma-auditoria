@@ -18,41 +18,35 @@ class BigQueryRepository:
         if errors:
             raise RuntimeError(f"BigQuery insert error in {table_id}: {errors}")
 
-    def get_urls_to_validate(self, source_run_id: str | None, technical_run_id: str | None, only_status_200: bool, max_urls: int | None):
-        join_technical = bool(only_status_200 or technical_run_id)
+    def get_urls_to_validate(self, source_run_id: str | None, technical_run_id: str | None, only_priority: bool, max_urls: int | None):
         query = f"""
-        SELECT
+        SELECT DISTINCT
           m.run_id AS source_run_id,
           m.page_url,
           m.normalized_url,
           m.url_hash,
           m.url_type,
           m.page_group,
-          COALESCE(t.device_profile, t.device_priority, 'mobile') AS device_profile
+          IFNULL(m.is_priority, FALSE) AS is_priority
         FROM `{self.project_id}.{self.dataset_id}.sitemap_master_urls` m
         """
-
         params = []
         where_clauses = ["m.should_audit = TRUE"]
 
-        if join_technical:
+        if technical_run_id:
             query += f"""
             INNER JOIN `{self.project_id}.{self.dataset_id}.technical_crawl_results` t
               ON m.normalized_url = t.normalized_url
             """
-        else:
-            query += "\nLEFT JOIN UNNEST([STRUCT(NULL AS device_profile, NULL AS device_priority)]) t"
-
-        if only_status_200:
-            where_clauses.append("t.status_code = 200")
-
-        if technical_run_id:
             where_clauses.append("t.run_id = @technical_run_id")
             params.append(bigquery.ScalarQueryParameter("technical_run_id", "STRING", technical_run_id))
 
         if source_run_id:
             where_clauses.append("m.run_id = @source_run_id")
             params.append(bigquery.ScalarQueryParameter("source_run_id", "STRING", source_run_id))
+
+        if only_priority:
+            where_clauses.append("IFNULL(m.is_priority, FALSE) = TRUE")
 
         query += " WHERE " + " AND ".join(where_clauses)
         query += " ORDER BY m.page_group, m.url_type"

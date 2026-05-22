@@ -8,6 +8,7 @@ class RunTaggingValidatorRequest(BaseModel):
     only_status_200: bool = True
     max_urls: Optional[int] = None
     device_priority: str = "mobile"
+    device_profile: Optional[str] = None
 
 class RunTaggingValidatorResponse(BaseModel):
     run_id: str

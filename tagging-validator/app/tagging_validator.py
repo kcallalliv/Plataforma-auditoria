@@ -24,6 +24,14 @@ from app.utils import (
 
 logger = logging.getLogger(__name__)
 
+def normalize_severity(value: str | None) -> str:
+    v = str(value or "").strip().lower()
+    if "alta" in v or "crit" in v:
+        return "Alta"
+    if "media" in v:
+        return "Media"
+    return "Baja"
+
 class TaggingValidatorService:
     def __init__(self, repository: BigQueryRepository | None = None):
         self.repository = repository or BigQueryRepository()
@@ -46,6 +54,7 @@ class TaggingValidatorService:
         total_error = 0
         errors = []
 
+        effective_device_profile = payload.device_profile or payload.device_priority or "mobile"
         headers = {"User-Agent": settings.request_user_agent}
 
         for row in urls:
@@ -86,6 +95,7 @@ class TaggingValidatorService:
                     "url_type": url_type,
                     "page_group": page_group,
                     "device_priority": payload.device_priority,
+                    "device_profile": effective_device_profile,
                     "has_gtm": detect_gtm(script_text),
                     "has_ga4": detect_ga4(script_text),
                     "has_datalayer": detect_datalayer(script_text),
@@ -126,15 +136,22 @@ class TaggingValidatorService:
                         "normalized_url": normalized_url,
                         "finding_code": f["finding_code"],
                         "finding_category": f["finding_category"],
-                        "severity": f["severity"],
+                        "severity": normalize_severity(f["severity"]),
                         "finding_detail": f["finding_detail"],
                         "recommendation": f["recommendation"],
+                        "module_name": "M8 Tagging Validator",
+                        "rule_id": f["finding_code"],
                         "component_type": f["component_type"],
                         "component_id": f["component_id"],
                         "component_selector": f["component_selector"],
                         "html_section": f["html_section"],
                         "element_value": f["element_value"],
                         "expected_value": f["expected_value"],
+                        "actual_value": f["element_value"],
+                        "element_id": f["component_id"],
+                        "element_class": None,
+                        "css_selector": f["component_selector"],
+                        "xpath": None,
                     })
 
             except Exception as exc:
@@ -154,6 +171,7 @@ class TaggingValidatorService:
                     "url_type": url_type,
                     "page_group": page_group,
                     "device_priority": payload.device_priority,
+                    "device_profile": effective_device_profile,
                     "has_gtm": False,
                     "has_ga4": False,
                     "has_datalayer": False,
@@ -193,6 +211,7 @@ class TaggingValidatorService:
             "audit_date": str(audit_date),
             "execution_status": status,
             "device_priority": payload.device_priority,
+            "device_profile": effective_device_profile,
             "total_urls_target": len(urls),
             "total_urls_processed": len(results),
             "total_urls_ok": total_ok,

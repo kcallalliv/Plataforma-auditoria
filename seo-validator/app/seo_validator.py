@@ -22,6 +22,14 @@ from app.utils import (
 
 logger = logging.getLogger(__name__)
 
+def normalize_severity(value: str | None) -> str:
+    v = str(value or "").strip().lower()
+    if "alta" in v or "crit" in v:
+        return "Alta"
+    if "media" in v:
+        return "Media"
+    return "Baja"
+
 class SEOValidatorService:
     def __init__(self, repository: BigQueryRepository | None = None):
         self.repository = repository or BigQueryRepository()
@@ -52,6 +60,7 @@ class SEOValidatorService:
             url_hash = row["url_hash"]
             url_type = row["url_type"]
             page_group = row["page_group"]
+            effective_device_profile = row.get("device_profile") or row.get("device_priority") or "mobile"
 
             checked_ts = datetime.utcnow().isoformat()
             seo_status = "ok"
@@ -86,6 +95,7 @@ class SEOValidatorService:
                     "url_hash": url_hash,
                     "url_type": url_type,
                     "page_group": page_group,
+                    "device_profile": effective_device_profile,
                     "title": title,
                     "title_length": len(title) if title else None,
                     "has_title": bool(title),
@@ -132,15 +142,22 @@ class SEOValidatorService:
                         "normalized_url": normalized_url,
                         "finding_code": f["finding_code"],
                         "finding_category": f["finding_category"],
-                        "severity": f["severity"],
+                        "severity": normalize_severity(f["severity"]),
                         "finding_detail": f["finding_detail"],
                         "recommendation": f["recommendation"],
+                        "module_name": "M4 SEO Validator",
+                        "rule_id": f["finding_code"],
                         "component_type": f["component_type"],
                         "component_id": f["component_id"],
                         "component_selector": f["component_selector"],
                         "html_section": f["html_section"],
                         "element_value": f["element_value"],
                         "expected_value": f["expected_value"],
+                        "actual_value": f["element_value"],
+                        "element_id": f["component_id"],
+                        "element_class": None,
+                        "css_selector": f["component_selector"],
+                        "xpath": None,
                     })
 
             except Exception as exc:
@@ -157,6 +174,7 @@ class SEOValidatorService:
                     "url_hash": url_hash,
                     "url_type": url_type,
                     "page_group": page_group,
+                    "device_profile": effective_device_profile,
                     "title": None,
                     "title_length": None,
                     "has_title": False,
